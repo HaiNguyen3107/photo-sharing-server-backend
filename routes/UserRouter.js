@@ -2,7 +2,7 @@ const express = require("express");
 const User = require("../db/userModel");
 const router = express.Router();
 
-// Middleware kiểm tra đăng nhập
+// Middleware to check login
 const requireLogin = (req, res, next) => {
   if (!req.session.user_id) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -10,7 +10,7 @@ const requireLogin = (req, res, next) => {
   next();
 };
 
-// Đăng ký user mới
+// register
 router.post("/", async (req, res) => {
   const {
     login_name,
@@ -22,7 +22,6 @@ router.post("/", async (req, res) => {
     occupation,
   } = req.body;
 
-  // Kiểm tra các trường bắt buộc
   if (!login_name || !password || !first_name || !last_name) {
     return res.status(400).json({
       error: "login_name, password, first_name, and last_name are required",
@@ -40,13 +39,11 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    // Kiểm tra login_name đã tồn tại chưa
     const existingUser = await User.findOne({ login_name: login_name });
     if (existingUser) {
       return res.status(400).json({ error: "login_name already exists" });
     }
 
-    // Tạo user mới
     const newUser = new User({
       login_name,
       password,
@@ -68,13 +65,12 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Lấy danh sách users (chỉ khi đã đăng nhập)
+// Get user list
 router.get("/list", requireLogin, async (req, res) => {
   try {
-    const users = await User.find({}, "-password");
+    const users = await User.find({}).select("_id first_name last_name");
 
     if (!users) {
-      console.log("UserRouter: User.find() trả về null hoặc undefined");
       return res
         .status(404)
         .json({ error: "No users found or database error" });
@@ -87,12 +83,14 @@ router.get("/list", requireLogin, async (req, res) => {
   }
 });
 
-// Lấy thông tin user theo ID
+// Get user by id
 router.get("/:id", requireLogin, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id, "-password");
+    const user = await User.findById(req.params.id).select(
+      "_id first_name last_name location description occupation"
+    );
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(400).json({ error: "User not found" });
     }
     res.json(user);
   } catch (error) {
