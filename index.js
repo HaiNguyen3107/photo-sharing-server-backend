@@ -21,7 +21,7 @@ app.use(express.json());
 // Session configuration
 app.use(
   session({
-    secret: "photo-app-secret",
+    secret: "photo-sharing-app-secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
