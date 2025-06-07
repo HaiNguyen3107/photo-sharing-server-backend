@@ -32,7 +32,6 @@ app.use(
   })
 );
 //////
-
 // Serve static images
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.get("/", (request, response) => {
