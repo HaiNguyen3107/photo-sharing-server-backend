@@ -10,7 +10,7 @@ const PhotoRouter = require("./routes/PhotoRouter");
 const AuthRouter = require("./routes/AuthRouter");
 dbConnect();
 // Middleware
-app.set("trust proxy", 1);
+//app.set("trust proxy", 1);
 app.use(
   cors({
     origin: true,
@@ -18,7 +18,7 @@ app.use(
   })
 );
 app.use(express.json());
-
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 // Session configuration
 app.use(
   session({
@@ -26,9 +26,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true,
+      secure: IS_PRODUCTION,
       httpOnly: true,
-      sameSite: "none",
+      sameSite: IS_PRODUCTION ? "none" : "lax",
     },
   })
 );
